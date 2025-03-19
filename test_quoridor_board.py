@@ -76,8 +76,7 @@ class TestQuoridorBoard(unittest.TestCase):
         """Test if a pawn cannot move through a fence."""
         self.board.player_positions[1] = (7, 4)
         self.board.place_fence(7, 3, 'H')  # Place a horizontal fence blocking Player 1
-        self.board.place_fence(6, 4, 'H')  # Place a horizontal fence blocking Player 1
-        self.assertFalse(self.board.move_pawn(1, (8, 4)))
+        self.assertFalse(self.board.move_pawn(1, (7, 3)))
 
     def test_V_fence_blocking_movement(self):
         """Test if a pawn cannot move through a fence."""

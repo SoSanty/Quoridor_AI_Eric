@@ -14,7 +14,7 @@ class QuoridorBoard:
     def __init__(self):
         """Initializes the Quoridor board with starting positions and an empty fence set."""
         self.size = 9  # 9x9 Board
-        self.player_positions = {1: (5, 1), 2: (4, 8)}  # Player 1 starts at (4,0), Player 2 at (4,8)
+        self.player_positions = {1: (4, 0), 2: (4, 8)}  # Player 1 starts at (4,0), Player 2 at (4,8)
         self.fences = set()
     
     def move_pawn(self, player: int, new_position: Tuple[int, int]) -> bool:
