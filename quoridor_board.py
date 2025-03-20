@@ -92,14 +92,15 @@ class QuoridorBoard:
         # Check if any wall in self.fences has the same first coordinate
         for wall in self.fences:
             coord1, coord2, orient = wall  # Unpack the wall coordinates and orientation
-            if (coord1 == (x, y) or coord2== (x, y)) and orient == orientation:  # If the first coordinate matches, return False
+            if (coord1 == (x, y) or coord2 == (x, y)) and orient == orientation:  # 
+                print("1")
                 return False
-            if coord1 == (x+1, y) and orient == "H":
-                return False
-            if coord1 == (x, y+1) and orient == "V":
+            if (coord1 == (x+1, y) or coord1 == (x, y+1)) and orient == orientation:
+                print("2")
                 return False
             if (coord1 == (x, y) and orient != orientation):  # Prevent crossing walls
-                    return False  # If there's a cross, return False
+                print("3")
+                return False  # If there's a cross, return False
 
         # Handle horizontal fence placement (between (x, y) and (x, y+1))
         if orientation == 'H':
