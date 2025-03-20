@@ -1,9 +1,12 @@
 @echo off
 
-echo Starting the GUI in background...
+
+echo Starts the Gui in background...
 start /B python gui.py
 
 
-echo Starting the game Quoridor...
-python main_try.py
+echo Starts the game Quoridor...
+python main.py
+
+
 pause
