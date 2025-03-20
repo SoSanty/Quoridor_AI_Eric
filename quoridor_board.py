@@ -240,39 +240,3 @@ class QuoridorBoard:
 
         print("Game state saved to file:", self.game_state)
 
-if __name__ == "__main__":
-    board = QuoridorBoard()
-    time.sleep(1)
-
-    board.update_gui_game_state()
-    time.sleep(1)
-    # Example: Move a player and update the game state
-    board.move_pawn(1, (4, 1))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(1, (4, 2))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(1, (4, 3))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(1, (4, 4))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(1, (4, 5))      
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(1, (4, 6))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(2, (4, 7))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(2, (4, 6))
-    board.update_gui_game_state()
-    time.sleep(1)
-    board.move_pawn(2, (4, 5))
-    board.update_gui_game_state()
-    time.sleep(1)
-
-

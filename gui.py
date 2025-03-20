@@ -49,12 +49,23 @@ class QuoridorGame:
             [(center_x, center_y - radius), (center_x, center_y + radius), (center_x + radius, center_y)]
         )
 
-
     def draw_grid(self):
-        """Draws the 9x9 Quoridor board grid."""
+        """Draws the 9x9 Quoridor board grid with row and column numbers."""
+        font = pygame.font.Font(None, 24)  # Load a default font
+        
         for i in range(self.grid_size + 1):
+            # Draw horizontal and vertical grid lines
             pygame.draw.line(self.screen, self.black, (0, i * self.cell_size), (self.window_size, i * self.cell_size), 3)
             pygame.draw.line(self.screen, self.black, (i * self.cell_size, 0), (i * self.cell_size, self.window_size), 3)
+
+            if i < self.grid_size:
+                # Draw row numbers on the left side
+                row_text = font.render(str(i), True, self.black)
+                self.screen.blit(row_text, (5, i * self.cell_size + self.cell_size // 3))
+
+                # Draw column numbers on the top side
+                col_text = font.render(str(i), True, self.black)
+                self.screen.blit(col_text, (i * self.cell_size + self.cell_size // 3, 5))
 
     def draw_player(self, position, color):
         """Draws a player at the given position."""
