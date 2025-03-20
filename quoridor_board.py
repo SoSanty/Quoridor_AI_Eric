@@ -72,31 +72,6 @@ class QuoridorBoard:
             print("Move is valid (simple adjacent).")
             return True
 
-        # # Check for jump moves over opponent
-        # opponent = 2 if player == 1 else 1
-        # ox, oy = self.player_positions[opponent]
-        # print(f"Opponent at ({ox}, {oy})")
-
-        # # Check if the opponent is directly in front of the player
-        # if (ox == x and abs(oy - y) == 1):  # Opponent is directly in front
-        #     print("Opponent is directly in front. Checking for jump.")
-        #     jump_x, jump_y = x, 2 * oy - y  # Calculate jump position
-        #     if (0 <= jump_x < self.size and 0 <= jump_y < self.size):  # Ensure jump is within bounds
-        #         if not self.is_fence_blocking(x, y, ox, oy) and not self.is_fence_blocking(ox, oy, jump_x, jump_y):
-        #             print("Move is valid (jump over opponent).")
-        #             return True
-
-        # # Check for side-stepping (if a fence prevents straight jump)
-        # if (x, y) == (ox, oy - 1) and (new_x, new_y) in [(ox - 1, oy), (ox + 1, oy)] and self.is_fence_blocking(x,y,x-1,y) and self.is_fence_blocking(x,y,x+1,y):
-        #     print("Checking for side-step move.")
-        #     if self.is_fence_blocking(x, y, ox, oy):
-        #         print("Fence is blocking the side-step (first segment).")
-        #         return False
-        #     if self.is_fence_blocking(ox, oy, new_x, new_y):
-        #         print("Fence is blocking the side-step (second segment).")
-        #         return False
-        #     print("Move is valid (side-step).")
-        #     return True
 
         print("Move is invalid (no valid conditions met).")
         return False
@@ -151,31 +126,25 @@ class QuoridorBoard:
         Checks if a fence blocks movement between two positions.
 
         Args:
-            x1, y1, x2, y2 (int): The coordinates of the move.
+        x1, y1, x2, y2 (int): The coordinates of the move.
 
         Returns:
-            bool: True if a fence is blocking, False otherwise.
+        bool: True if a fence is blocking, False otherwise.
         """
         for wall in self.fences:
             (fx1, fy1), (fx2, fy2), orient = wall
 
-            if orient == 'H':
-                # Horizontal wall blocks vertical movement only
-                if ((x1 == x2 and fx1 == x1 - 1 and fy1 == min(y1, y2)) or
-                    (x1 == x2 and fx2 == x1 - 1 and fy2 == min(y1, y2))):
-                    print("Blocked upwards")
-                    return True  # Moving upward but blocked
-                if ((x1 == x2 and fx1 == x1 and fy1 == min(y1, y2)) or 
-                    (x1 == x2 and fx2 == x1 and fy2 == min(y1, y2))):
-                    print("Blocked downwards")
-                    return True  # Moving downward but blocked
+            if orient == 'H':  
+            # Horizontal walls block vertical movement (up/down)
+                if ((y1 > y2 and (fx1, fy1) == (x1, y2)) or (y2 > y1 and (fx1, fy1) == (x1, y1)) or
+                    (y1 > y2 and (fx2, fy2) == (x1, y2)) or (y2 > y1 and (fx2, fy2) == (x1, y1))):
+                    return True  # Moving up or down but blocked
 
-            elif orient == 'V':
-                # Vertical wall blocks horizontal movement only
-                if (y1 == y2 and fy1 == y1 - 1 and fx1 == min(x1, x2)):
-                    return True  # Moving left but blocked
-                if (y1 == y2 and fy1 == y1 and fx1 == min(x1, x2)):
-                    return True  # Moving right but blocked
+            elif orient == 'V':  
+            # Vertical walls block horizontal movement (left/right)
+                if ((x1 > x2 and (fx1, fy1) == (x2, y1)) or (x2 > x1 and (fx1, fy1) == (x1, y1)) or
+                    (x1 > x2 and (fx2, fy2) == (x2, y1)) or (x2 > x1 and (fx2, fy2) == (x1, y1))):
+                    return True  # Moving left or right but blocked
 
         return False
     
