@@ -1,5 +1,8 @@
 from collections import deque
 from typing import List, Tuple, Set
+import time
+import json
+import os
 
 class QuoridorBoard:
     """
@@ -16,6 +19,13 @@ class QuoridorBoard:
         self.size = 9  # 9x9 Board
         self.player_positions = {1: (4, 0), 2: (4, 8)}  # Player 1 starts at (4,0), Player 2 at (4,8)
         self.fences = set()
+        self.fences_gui = set()
+        self.game_state = {}
+            
+        # Delete the game_state.json file if it exists
+        if os.path.exists("game_state.json"):
+            os.remove("game_state.json")  # Delete the file completely
+            print("Game state file deleted.")
     
     def move_pawn(self, player: int, new_position: Tuple[int, int]) -> bool:
         """
@@ -120,13 +130,13 @@ class QuoridorBoard:
 
         # Handle horizontal fence placement (between (x, y) and (x, y+1))
         if orientation == 'H':
-            if y < 0 or y >= self.size - 1 or x < 0 or x >= self.size:
+            if y < 0 or y >= self.size - 1 or x < 0 or x >= self.size - 1:
                 return False  # Ensure coordinates are valid for horizontal placement
             wall = ((x, y), (x + 1, y), 'H')
 
         # Handle vertical fence placement (between (x, y) and (x+1, y))
         elif orientation == 'V':
-            if x < 0 or x >= self.size - 1 or y < 0 or y >= self.size:
+            if x < 0 or x >= self.size - 1 or y < 0 or y >= self.size - 1:
                 return False  # Ensure coordinates are valid for vertical placement
             wall = ((x, y), (x , y + 1), 'V')
         
@@ -194,10 +204,8 @@ class QuoridorBoard:
                 return True
 
             if (x, y) in visited:
-                print(f"Already visited ({x}, {y})")
                 continue
             visited.add((x, y))
-            print(f"Visiting ({x}, {y})")
 
             # Check all possible moves (up, down, left, right)
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -205,37 +213,67 @@ class QuoridorBoard:
                 if 0 <= nx < self.size and 0 <= ny < self.size and (nx, ny) not in visited:
                     if not self.is_fence_blocking(x, y, nx, ny):  
                         stack.append((nx, ny))  # Add to stack for DFS
-                    elif self.is_fence_blocking(x, y, nx, ny):
-                        print(f"Blocked by fence at ({nx}, {ny})")
 
         print(f'Player {player} has no path to goal.')
         # If we exit the loop, no valid path was found
         return False
     
-    def display_board(self):
-    # Create an empty grid with spaces for walls
-        board_display = [[' ' for _ in range(self.size * 2 - 1)] for _ in range(self.size * 2 - 1)]
-        # Place players
-        for player, (x, y) in self.player_positions.items():
-            board_display[y * 2][x * 2] = 'P'  # Players centered on the board
-        # Place fences
-        for (x1, y1), (x2, y2), orientation in self.fences:
-            if orientation == 'H':  # Horizontal wall
-                board_display[y1 * 2 + 1][x1 * 2] = '--'  # Place between two tiles horizontally
-                board_display[y1 * 2 + 1][x1 * 2 + 1] = '--'  # Extend the wall
-            elif orientation == 'V':  # Vertical wall
-                board_display[y1 * 2][x1 * 2 + 1] = '|'  # Place between two tiles vertically
-                board_display[y1 * 2 + 1][x1 * 2 + 1] = '|'  # Extend the wall
-        # Print the board
-        for row in board_display:
-            print(''.join(row))
-        print('\n')
+    def update_gui_game_state(self):
+        """Saves the game state to a JSON file."""
 
-# Example Usage
+        walls = list(self.fences)
+        for wall in walls:
+            coord1, coord2, orient = wall
+            x , y = coord1
+            self.fences_gui.add((x, y, orient))
+
+        player1 = self.player_positions[1]
+        player2 = self.player_positions[2]
+
+        self.game_state = {
+            "player_positions": {"player1": player1, "player2": player2},
+            "walls": list(self.fences_gui),
+            "turn": "player1",
+            "board": []
+        }
+
+        with open("game_state.json", "w") as file:
+            json.dump(self.game_state, file)
+
+        print("Game state saved to file:", self.game_state)
+
 if __name__ == "__main__":
     board = QuoridorBoard()
-    board.display_board()
-    board.move_pawn(1, (4, 1))  # Move Player 1 forward
-    board.display_board()
-    board.place_fence(4, 4, 'H')  # Place horizontal fence
-    board.display_board()
+    time.sleep(2)
+
+    board.update_gui_game_state()
+    time.sleep(2)
+    # Example: Move a player and update the game state
+    board.move_pawn(1, (4, 1))
+    board.update_gui_game_state()
+    time.sleep(2)
+
+    board.place_fence(4, 4, "H")  # Example fence
+    board.update_gui_game_state()
+    time.sleep(2)
+
+    board.place_fence(4, 4, "V")  # Example fence
+    board.update_gui_game_state()
+    time.sleep(2)
+
+    board.move_pawn(2, (4, 7))
+    board.update_gui_game_state()
+    time.sleep(2)
+
+    board.place_fence(2, 3, "H")  # Example fence
+    board.update_gui_game_state()
+    time.sleep(2)
+
+    board.place_fence(1, 8, "V")  # Example fence
+    board.update_gui_game_state()
+    time.sleep(2)
+
+    board.move_pawn(1, (3, 1))
+    board.update_gui_game_state()
+    time.sleep(2)
+

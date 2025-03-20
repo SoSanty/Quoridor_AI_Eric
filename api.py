@@ -1,4 +1,4 @@
-import random
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from quoridor_board import QuoridorBoard
@@ -17,16 +17,17 @@ app.add_middleware(
 GRID_SIZE = 9
 MAX_WALLS = 10
 
-board = QuoridorBoard()
+
 @app.get("/state")
 def get_mock_game_state():
     """
     Returns a mock game state with random player positions and walls.
     """
-    board.place_fence(5, 4, 'V')
     walls = board.fences
+    player1 = board.player_positions[1]
+    player2 = board.player_positions[2]
     mock_state = {
-        "player_positions": {"player1": (4,0), "player2": (4,8)},
+        "player_positions": {"player1": player1, "player2": player2},
         "walls": walls,
         "turn": "player1",
         "board": []  # The GUI does not need full board details
@@ -35,6 +36,12 @@ def get_mock_game_state():
     return mock_state
 
 if __name__ == "__main__":
-    import uvicorn
     print("Starting mock FastAPI server at http://127.0.0.1:8000")
     uvicorn.run(app, host="127.0.0.1", port=8000)
+    board = QuoridorBoard()
+    board.move_pawn(1, (4, 1))  # Move Player 1 forward
+    board.update_game_state()
+    time.sleep(2)  # Wait for 5 seconds
+    board.place_fence(4, 4, 'H')  # Place horizontal fence
+    board.update_game_state()
+    time.sleep(2)  # Wait for 5 seconds

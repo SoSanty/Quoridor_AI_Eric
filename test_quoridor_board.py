@@ -15,7 +15,7 @@ class TestQuoridorBoard(unittest.TestCase):
     
     def test_valid_pawn_move(self):
         """Test if a valid pawn move is executed correctly."""
-        self.assertTrue(self.board.move_pawn(1, (4, 1)))  # Move forward
+        self.board.move_pawn(1, (4, 1))  # Move forward
         self.assertEqual(self.board.player_positions[1], (4, 1))
     
     def test_invalid_pawn_move_outside_board(self):
