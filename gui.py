@@ -35,6 +35,21 @@ class QuoridorGame:
         except (FileNotFoundError, json.JSONDecodeError):
             return None
 
+    def draw_split_circle(self, position):
+        """Draws a split blue-red circle when both players are in the same position."""
+        x, y = position
+        center_x = x * self.cell_size + self.cell_size // 2
+        center_y = y * self.cell_size + self.cell_size // 2
+        radius = self.player_radius
+
+        # Draw left half red, right half blue
+        pygame.draw.circle(self.screen, self.red, (center_x, center_y), radius)
+        pygame.draw.polygon(
+            self.screen, self.blue,
+            [(center_x, center_y - radius), (center_x, center_y + radius), (center_x + radius, center_y)]
+        )
+
+
     def draw_grid(self):
         """Draws the 9x9 Quoridor board grid."""
         for i in range(self.grid_size + 1):
@@ -51,7 +66,7 @@ class QuoridorGame:
     def draw_wall(self, x, y, orientation):
         """Draws a wall at the given position and orientation."""
         if orientation == "H":
-            pygame.draw.rect(self.screen, self.black, (y * self.cell_size, x * self.cell_size + self.cell_size - self.wall_thickness, self.cell_size * 2, self.wall_thickness))
+            pygame.draw.rect(self.screen, self.black, (x * self.cell_size, y * self.cell_size + self.cell_size - self.wall_thickness, self.cell_size * 2, self.wall_thickness))
         elif orientation == "V":
             pygame.draw.rect(self.screen, self.black, (x * self.cell_size + self.cell_size - self.wall_thickness, y * self.cell_size, self.wall_thickness, self.cell_size * 2))
 
@@ -71,21 +86,39 @@ class QuoridorGame:
                 last_state = game_state
                 print("New game state loaded:", game_state)
 
+                player1_pos = game_state["player_positions"]["player1"]
+                player2_pos = game_state["player_positions"]["player2"]
+
                 # Erase and draw the players at their new positions
                 if self.last_player1_pos != game_state["player_positions"]["player1"]:
                     # Clear the previous dot (if there is one) and draw the new position
                     if self.last_player1_pos:
                         self.draw_player(self.last_player1_pos, self.white)  # Erase by drawing white over it
-                    self.draw_player(game_state["player_positions"]["player1"], self.red)
-                    self.last_player1_pos = game_state["player_positions"]["player1"]
+                    if player1_pos == player2_pos:
+                    # If both players are at the same position, draw a split circle
+                        self.draw_split_circle(player1_pos)
+                        self.last_player1_pos = player1_pos
+                        self.last_player2_pos = player2_pos
+                    else:
+                        self.draw_player(game_state["player_positions"]["player1"], self.red)
+                        self.draw_player(game_state["player_positions"]["player2"], self.blue)
+                        self.last_player1_pos = game_state["player_positions"]["player1"]
 
                 if self.last_player2_pos != game_state["player_positions"]["player2"]:
                     # Clear the previous dot (if there is one) and draw the new position
                     if self.last_player2_pos:
                         self.draw_player(self.last_player2_pos, self.white)  # Erase by drawing white over it
-                    self.draw_player(game_state["player_positions"]["player2"], self.blue)
-                    self.last_player2_pos = game_state["player_positions"]["player2"]
+                    if player1_pos == player2_pos:
+                    # If both players are at the same position, draw a split circle
+                        self.draw_split_circle(player1_pos)
+                        self.last_player1_pos = player1_pos
+                        self.last_player2_pos = player2_pos
+                    else:
+                        self.draw_player(game_state["player_positions"]["player1"], self.red)
+                        self.draw_player(game_state["player_positions"]["player2"], self.blue)
+                        self.last_player2_pos = game_state["player_positions"]["player2"]
 
+     
                 # Draw the walls based on the game state
                 for wall in game_state["walls"]:
                     x1, y1, orientation = wall

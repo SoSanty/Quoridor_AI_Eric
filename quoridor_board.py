@@ -53,6 +53,11 @@ class QuoridorBoard:
 
         print(f"Player {player} at ({x}, {y}) attempting to move to ({new_x}, {new_y})")
 
+        # # Check for opponent occupied space
+        # if new_position == self.player_positions[3 - player]:
+        #     print("Opponent is occupying the space.")
+        #     return False
+        
         # Ensure the move is within board boundaries
         if not (0 <= new_x < self.size and 0 <= new_y < self.size):
             print("Move is outside the board boundaries.")
@@ -67,42 +72,31 @@ class QuoridorBoard:
             print("Move is valid (simple adjacent).")
             return True
 
-        # Check for jump moves over opponent
-        opponent = 2 if player == 1 else 1
-        ox, oy = self.player_positions[opponent]
-        print(f"Opponent at ({ox}, {oy})")
+        # # Check for jump moves over opponent
+        # opponent = 2 if player == 1 else 1
+        # ox, oy = self.player_positions[opponent]
+        # print(f"Opponent at ({ox}, {oy})")
 
-        # Check if the opponent is directly in front of the player
-        if (ox == x and abs(oy - y) == 1):  # Opponent is directly in front
-            print("Opponent is directly in front. Checking for jump.")
-            jump_x, jump_y = x, 2 * oy - y  # Calculate jump position
-            if (0 <= jump_x < self.size and 0 <= jump_y < self.size):  # Ensure jump is within bounds
-                if not self.is_fence_blocking(x, y, ox, oy) and not self.is_fence_blocking(ox, oy, jump_x, jump_y):
-                    print("Move is valid (jump over opponent).")
-                    return True
+        # # Check if the opponent is directly in front of the player
+        # if (ox == x and abs(oy - y) == 1):  # Opponent is directly in front
+        #     print("Opponent is directly in front. Checking for jump.")
+        #     jump_x, jump_y = x, 2 * oy - y  # Calculate jump position
+        #     if (0 <= jump_x < self.size and 0 <= jump_y < self.size):  # Ensure jump is within bounds
+        #         if not self.is_fence_blocking(x, y, ox, oy) and not self.is_fence_blocking(ox, oy, jump_x, jump_y):
+        #             print("Move is valid (jump over opponent).")
+        #             return True
 
-        # Check for side-stepping (if a fence prevents straight jump)
-        if (x, y) == (ox, oy - 1) and (new_x, new_y) in [(ox - 1, oy), (ox + 1, oy)]:
-            print("Checking for side-step move.")
-            if self.is_fence_blocking(x, y, ox, oy):
-                print("Fence is blocking the side-step (first segment).")
-                return False
-            if self.is_fence_blocking(ox, oy, new_x, new_y):
-                print("Fence is blocking the side-step (second segment).")
-                return False
-            print("Move is valid (side-step).")
-            return True
-
-        if (x, y) == (ox, oy + 1) and (new_x, new_y) in [(ox - 1, oy), (ox + 1, oy)]:
-            print("Checking for side-step move.")
-            if self.is_fence_blocking(x, y, ox, oy):
-                print("Fence is blocking the side-step (first segment).")
-                return False
-            if self.is_fence_blocking(ox, oy, new_x, new_y):
-                print("Fence is blocking the side-step (second segment).")
-                return False
-            print("Move is valid (side-step).")
-            return True
+        # # Check for side-stepping (if a fence prevents straight jump)
+        # if (x, y) == (ox, oy - 1) and (new_x, new_y) in [(ox - 1, oy), (ox + 1, oy)] and self.is_fence_blocking(x,y,x-1,y) and self.is_fence_blocking(x,y,x+1,y):
+        #     print("Checking for side-step move.")
+        #     if self.is_fence_blocking(x, y, ox, oy):
+        #         print("Fence is blocking the side-step (first segment).")
+        #         return False
+        #     if self.is_fence_blocking(ox, oy, new_x, new_y):
+        #         print("Fence is blocking the side-step (second segment).")
+        #         return False
+        #     print("Move is valid (side-step).")
+        #     return True
 
         print("Move is invalid (no valid conditions met).")
         return False
@@ -142,7 +136,7 @@ class QuoridorBoard:
         
         # Add the new wall to the fence set
         self.fences.add(wall)
-        print(self.fences)
+        print(f"Fences:{self.fences}")
         # Ensure both players still have a path to their goal
         if not self.has_path_to_goal(1) or not self.has_path_to_goal(2):
             # Undo the fence placement if it blocks paths
@@ -167,9 +161,13 @@ class QuoridorBoard:
 
             if orient == 'H':
                 # Horizontal wall blocks vertical movement only
-                if (x1 == x2 and fx1 == x1 - 1 and fy1 == min(y1, y2)):
+                if ((x1 == x2 and fx1 == x1 - 1 and fy1 == min(y1, y2)) or
+                    (x1 == x2 and fx2 == x1 - 1 and fy2 == min(y1, y2))):
+                    print("Blocked upwards")
                     return True  # Moving upward but blocked
-                if (x1 == x2 and fx1 == x1 and fy1 == min(y1, y2)):
+                if ((x1 == x2 and fx1 == x1 and fy1 == min(y1, y2)) or 
+                    (x1 == x2 and fx2 == x1 and fy2 == min(y1, y2))):
+                    print("Blocked downwards")
                     return True  # Moving downward but blocked
 
             elif orient == 'V':
@@ -244,36 +242,37 @@ class QuoridorBoard:
 
 if __name__ == "__main__":
     board = QuoridorBoard()
-    time.sleep(2)
+    time.sleep(1)
 
     board.update_gui_game_state()
-    time.sleep(2)
+    time.sleep(1)
     # Example: Move a player and update the game state
     board.move_pawn(1, (4, 1))
     board.update_gui_game_state()
-    time.sleep(2)
-
-    board.place_fence(4, 4, "H")  # Example fence
+    time.sleep(1)
+    board.move_pawn(1, (4, 2))
     board.update_gui_game_state()
-    time.sleep(2)
-
-    board.place_fence(4, 4, "V")  # Example fence
+    time.sleep(1)
+    board.move_pawn(1, (4, 3))
     board.update_gui_game_state()
-    time.sleep(2)
-
+    time.sleep(1)
+    board.move_pawn(1, (4, 4))
+    board.update_gui_game_state()
+    time.sleep(1)
+    board.move_pawn(1, (4, 5))      
+    board.update_gui_game_state()
+    time.sleep(1)
+    board.move_pawn(1, (4, 6))
+    board.update_gui_game_state()
+    time.sleep(1)
     board.move_pawn(2, (4, 7))
     board.update_gui_game_state()
-    time.sleep(2)
-
-    board.place_fence(2, 3, "H")  # Example fence
+    time.sleep(1)
+    board.move_pawn(2, (4, 6))
     board.update_gui_game_state()
-    time.sleep(2)
-
-    board.place_fence(1, 8, "V")  # Example fence
+    time.sleep(1)
+    board.move_pawn(2, (4, 5))
     board.update_gui_game_state()
-    time.sleep(2)
+    time.sleep(1)
 
-    board.move_pawn(1, (3, 1))
-    board.update_gui_game_state()
-    time.sleep(2)
 
