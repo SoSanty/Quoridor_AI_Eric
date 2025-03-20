@@ -92,7 +92,11 @@ class QuoridorBoard:
         # Check if any wall in self.fences has the same first coordinate
         for wall in self.fences:
             coord1, coord2, orient = wall  # Unpack the wall coordinates and orientation
-            if coord1 == (x, y) or coord2== (x, y):  # If the first coordinate matches, return False
+            if (coord1 == (x, y) or coord2== (x, y)) and orient == orientation:  # If the first coordinate matches, return False
+                return False
+            if coord1 == (x+1, y) and orient == "H":
+                return False
+            if coord1 == (x, y+1) and orient == "V":
                 return False
             if (coord1 == (x, y) and orient != orientation):  # Prevent crossing walls
                     return False  # If there's a cross, return False
@@ -135,13 +139,13 @@ class QuoridorBoard:
             (fx1, fy1), (fx2, fy2), orient = wall
 
             if orient == 'H':  
-            # Horizontal walls block vertical movement (up/down)
+                # Horizontal walls block vertical movement (up/down)
                 if ((y1 > y2 and (fx1, fy1) == (x1, y2)) or (y2 > y1 and (fx1, fy1) == (x1, y1)) or
                     (y1 > y2 and (fx2, fy2) == (x1, y2)) or (y2 > y1 and (fx2, fy2) == (x1, y1))):
                     return True  # Moving up or down but blocked
 
             elif orient == 'V':  
-            # Vertical walls block horizontal movement (left/right)
+                # Vertical walls block horizontal movement (left/right)
                 if ((x1 > x2 and (fx1, fy1) == (x2, y1)) or (x2 > x1 and (fx1, fy1) == (x1, y1)) or
                     (x1 > x2 and (fx2, fy2) == (x2, y1)) or (x2 > x1 and (fx2, fy2) == (x1, y1))):
                     return True  # Moving left or right but blocked
