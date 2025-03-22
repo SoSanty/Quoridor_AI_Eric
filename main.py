@@ -21,10 +21,6 @@ class MainGame:
                 if current_player == 1:
                     print(f"Player {current_player}'s turn.")
 
-
-                    
-
-
                     while True:
                         move_type = input("Move the pawn (M) or place a fence (F)? ").strip().upper()
                         if move_type == 'M':
@@ -34,7 +30,6 @@ class MainGame:
                                     self.board.move_pawn(current_player, (x, y))
                                     print("Valid move!")
                                     self.board.update_gui_game_state()  # save the state in json
-                                
                                     break
                                 else:
                                     print("Invalid move, try again.")
@@ -58,15 +53,9 @@ class MainGame:
                         else:
                             print("Invalid input. Use 'M' to move or 'F' to place a fence.")
                 else:
-                    action, new_move = self.ai.make_move(current_player)
-                    if (action== "move"):
-                        x, y = new_move
-                        self.board.move_pawn(current_player, (x, y))
-                        self.board.update_gui_game_state()  # Salva lo stato nel file JSON
-                    if (action== "fence"):
-                        x, y, orientation = new_move
-                        self.board.place_fence(x, y, orientation)
-                        self.board.update_gui_game_state()  # Salva lo stato nel file JSON
+                    self.ai.make_move(current_player)
+                    self.board.update_gui_game_state()  # Salva lo stato nel file JSON
+
 
 
                 # Check for victory
