@@ -55,10 +55,6 @@ class QuoridorBoard:
 
         print(f"Player {player} at ({x}, {y}) attempting to move to ({new_x}, {new_y})")
 
-        # # Check for opponent occupied space
-        #if new_position == self.player_positions[3 - player]:
-        #     print("Opponent is occupying the space.")
-        #     return False
         
         # Ensure the move is within board boundaries
         if not (0 <= new_x < self.size and 0 <= new_y < self.size):
