@@ -13,6 +13,7 @@ class AI:
         self.board = board  # Create an instance of the game board
         self.game_state = {}
         self.game_state = self.read_game_state()  # Ensure game state is loaded or initialized
+        self.fences_player2 = 10  # Counter for fences placed by player 2
 
 
     def read_game_state(self):
@@ -55,37 +56,50 @@ class AI:
 
 
 
-    def get_valid_fences(self):
+    def get_valid_fences(self,player):
         """Returns a list of valid fences the AI can place."""
         valid_fences = []
         print(self.game_state)
-        for x in range(8):  # Da 0 a 8 perché una barriera è tra due caselle
+        # Assume that self.game_state is already defined and contains the "walls" key.
+        walls = self.game_state.get("walls", [])  # Get the list of walls from game state (default empty list)
+
+        # Convert walls from lists to tuples for proper comparison
+        walls_set = {tuple(wall) for wall in walls}  # Convert walls to a set of tuples for efficient comparison
+
+        valid_fences = []  # List to store valid fences
+
+        # Iterate through the possible fence locations and orientations
+        for x in range(8):  # From 0 to 7 because a fence is placed between two squares
             for y in range(8):
-                for orientation in ["H", "V"]:  # Orizzontale o verticale
-                    if orientation == "H" and ((x, y, orientation) not in self.game_state["walls"] or (x-1, y, orientation) not in self.game_state["walls"]):
-                        valid_fences.append((x, y, orientation))
-                    if orientation == "V" and ((x, y, orientation) not in self.game_state["walls"] or (x, y-1, orientation) not in self.game_state["walls"]):
-                        valid_fences.append((x, y, orientation))
+                for orientation in ["H", "V"]:  # Horizontal or Vertical fence
+                    if orientation == "H":
+                        # Check if the horizontal fence at (x, y) is valid (not blocked by a wall)
+                        if (x, y, orientation) not in walls_set and (x + 1, y, orientation) not in walls_set and (x - 1, y, orientation) not in walls_set and (x,y,'V') not in walls_set:
+                            valid_fences.append((x, y, orientation))  # Add valid horizontal fence
+                    if orientation == "V":
+                        # Check if the vertical fence at (x, y) is valid (not blocked by a wall)
+                        if (x, y, orientation) not in walls_set and (x, y + 1, orientation) not in walls_set and (x, y - 1, orientation) not in walls_set and (x,y,'H') not in walls_set:
+                            valid_fences.append((x, y, orientation))  # Add valid vertical fence
+        print(f"✅ Valid fences for player {player}: {valid_fences}")
         return valid_fences
 
 
     def heuristic(self, player):
-        """
-        Evaluate the game state for the player.  
-        The closer the player is to the winning row, the higher the score.  
-        If the opponent is close to victory, the score is lower.
-        """
+        """Evaluates the game state based on A* shortest paths."""
         opponent = 2 if player == 1 else 1
-        player_y = self.game_state["player_positions"][f"player{player}"][1]
-        opponent_y = self.game_state["player_positions"][f"player{opponent}"][1]
 
-        goal_row = 8 if player == 1 else 0  # Riga vincente
+        player_path = self.find_shortest_path(player)
+        opponent_path = self.find_shortest_path(opponent)
 
-        # Punteggio basato sulla distanza dalla vittoria
-        player_score = goal_row - player_y if player == 1 else player_y - goal_row
-        opponent_score = goal_row - opponent_y if opponent == 1 else opponent_y - goal_row
+        player_distance = len(player_path)-1 if player_path else float('inf')
+        opponent_distance = len(opponent_path)-1 if opponent_path else float('inf')
 
-        return opponent_score - player_score  # L'AI cerca di massimizzare questo valore
+        # Include the number of walls placed as a factor in the heuristic
+        player_walls = self.game_state.get("player_walls", {}).get(f"player{player}", 0)
+        opponent_walls = self.game_state.get("player_walls", {}).get(f"player{opponent}", 0)
+
+        # Adjust the heuristic to consider the impact of walls more significantly
+        return opponent_distance - player_distance + (player_walls - opponent_walls) * 0.5  # AI wants a larger gap in its favor
 
     def minimax(self, depth, alpha, beta, maximizing_player, player):
         if depth == 0:
@@ -170,7 +184,7 @@ class AI:
         """Selects the best move using A* for the shortest path and Minimax for strategic decisions."""
         
         valid_moves = self.get_valid_moves(player)
-        valid_fences = self.get_valid_fences()
+        valid_fences = self.get_valid_fences(player)
 
         if not valid_moves and not valid_fences:
             print("❌ No valid moves or fences available.")
@@ -183,6 +197,8 @@ class AI:
             next_step = path[1]
             if next_step in valid_moves:
                 a_star_move = ("move", next_step)  # Save the best A* move (don't return yet!)
+        
+        print(f"A* path for player {a_star_move}")  # Debugging
 
         # 🔍 2. Use Minimax to evaluate if another move is better
         best_action = None
@@ -201,24 +217,46 @@ class AI:
             if move_value > best_value:
                 best_value = move_value
                 best_action = ("move", move)
+                print(f"🔍 Best move value from Minimax: {move_value}, {best_value}, {best_action}")
 
-        # Test all possible fences with Minimax
+        # 🔍 Test all possible fences, but now evaluate them properly
         for fence in valid_fences:
             x, y, orientation = fence
-            self.game_state["walls"].append(fence)  # Simulate fence
-            fence_value = self.minimax(depth=3, alpha=-float('inf'), beta=float('inf'),
-                                        maximizing_player=False, player=2 if player == 1 else 1)
-            self.game_state["walls"].remove(fence)  # Reset fence
+            opponent = 2 if player == 1 else 1
+
+            # Store original opponent path before placing the fence
+            original_opponent_path = self.find_shortest_path(opponent)
+            original_opponent_distance = len(original_opponent_path) if original_opponent_path else float('inf')
+
+            # ✅ Correctly place the fence in QuoridorBoard
+            self.board.fences.add(((x, y), (x + (1 if orientation == "H" else 0), y + (1 if orientation == "V" else 0)), orientation))
+            self.board.update_gui_game_state()  # ✅ Ensure game state is updated
+
+            # ✅ Recalculate the opponent’s shortest path
+            new_opponent_path = self.find_shortest_path(opponent)
+            new_opponent_distance = len(new_opponent_path) if new_opponent_path else float('inf')
+
+            # ✅ Reset the fence by removing it from `self.board.fences`
+            self.board.fences.remove(((x, y), (x + (1 if orientation == "H" else 0), y + (1 if orientation == "V" else 0)), orientation))
+            self.board.fences_gui.remove((x, y, orientation))
+            self.board.update_gui_game_state()  # ✅ Reset game state
+
+            slowdown = new_opponent_distance - original_opponent_distance
+            fence_value = slowdown * 5  # Assign a weight to opponent slowdown
+            print(f"Fence:{x,y,orientation} Slowdown: {slowdown}, Fence value: {fence_value}")
 
             if fence_value > best_value:
                 best_value = fence_value
                 best_action = ("fence", fence)
+                print(f"🔍 Best fence value from Minimax: {fence_value}, {best_value}, {best_action}")
+
+        
 
         # 🔍 3. Compare A* move vs. Minimax move
         if a_star_move:
             print(f"✅ A* suggests move: {a_star_move[1]}")
             # If Minimax doesn't suggest a better alternative, use A* move
-            if best_action is None or best_value < 0:
+            if best_action is None:
                 return a_star_move  
 
         print(f"🔍 Minimax chose: {best_action}")  # Debugging
@@ -239,16 +277,18 @@ class AI:
             if success:
                 self.game_state = self.read_game_state()
                 print(f" AI moved player {player} to {new_position}")
-                return action[0], new_position
             else:
                 print(f" AI tried to move player {player} to {new_position}, but move was invalid.")
 
-        elif action[0] == "fence":
-            x, y, orientation = action[1]
-            success = self.board.place_fence(x, y, orientation)
-            if success:
-                self.game_state = self.read_game_state()
-                print(f" AI placed a fence at ({x}, {y}) with orientation {orientation}")
-                return action[0], action[1]
+        elif action[0] == "fence" :
+            if (self.fences_player2 > 0): #it checks if the AI put 10 walls
+                x, y, orientation = action[1]
+                success = self.board.place_fence(x, y, orientation,player)
+                if success:
+                    self.fences_player2 -= 1  # Increment fence counter for player 2
+                    self.game_state = self.read_game_state()
+                    print(f" AI placed a fence at ({x}, {y}) with orientation {orientation}")
+                else:
+                    print(f" AI tried to place a fence at ({x}, {y}), but it was invalid.")
             else:
-                print(f" AI tried to place a fence at ({x}, {y}), but it was invalid.")
+                print("AI doesn't have left fences to play.")
