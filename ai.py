@@ -139,7 +139,7 @@ class AI:
             return min_eval
 
     def find_shortest_path(self, player):
-        """Trova il percorso più breve per il giocatore evitando i muri usando A*."""
+        """Find the shortest path for the player by avoiding walls using A*."""
         start = tuple(self.game_state["player_positions"][f"player{player}"])
         goal_y = 8 if player == 1 else 0  # Winning row
 

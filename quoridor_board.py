@@ -87,7 +87,7 @@ class QuoridorBoard:
             bool: True if the fence was placed, False otherwise.
         """
         if self.fences_left[player] <= 0:
-            print(f"Giocatore {player} ha finito i muri!")
+            print(f"Player {player} ran out of walls!")
             return False
 
 
