@@ -21,7 +21,7 @@ class QuoridorGame:
 
         # Initialize Pygame
         pygame.init()
-        self.screen = pygame.display.set_mode((self.window_size, self.window_size))
+        self.screen = pygame.display.set_mode((self.window_size + 250, self.window_size))
         pygame.display.set_caption("Quoridor Game")
 
     def read_game_state(self):
@@ -81,6 +81,27 @@ class QuoridorGame:
         elif orientation == "V":
             pygame.draw.rect(self.screen, self.black, (x * self.cell_size + self.cell_size - self.wall_thickness, y * self.cell_size, self.wall_thickness, self.cell_size * 2))
 
+    def draw_wall_count(self, player1_walls, player2_walls):
+        """Draw the remaining walls for both players on the right side of the board."""
+        font = pygame.font.Font(None, 30)
+        
+        # Ripulire l'area dove vengono disegnati i contatori
+        # Cancelliamo l'area in cui vogliamo scrivere i numeri. 
+        # Qui disegniamo un rettangolo bianco che copre l'intera area a destra della griglia.
+        pygame.draw.rect(self.screen, self.white, (self.window_size, 0, 250, self.window_size))
+
+        # Disegnare il contatore dei muri di Player 1
+        player1_text = font.render(f"Player 1 Walls: {player1_walls}", True, self.red)
+        self.screen.blit(player1_text, (self.window_size + 20, 50))  # Posiziona a destra della griglia
+        
+        # Disegnare il contatore dei muri di Player 2
+        player2_text = font.render(f"Player 2 Walls: {player2_walls}", True, self.blue)
+        self.screen.blit(player2_text, (self.window_size + 20, 100))  # Posiziona a destra della griglia
+
+
+
+
+
     def update_game_state(self):
         """Handles the game state update and rendering."""
         running = True
@@ -134,6 +155,10 @@ class QuoridorGame:
                 for wall in game_state["walls"]:
                     x1, y1, orientation = wall
                     self.draw_wall(x1, y1, orientation)
+
+                # Draw the remaining walls
+                self.draw_wall_count(game_state["walls_remaining"]["player_1"], game_state["walls_remaining"]["player_2"])
+
             elif not game_state:
                 # If the game state is empty, clear the board
                 self.screen.fill(self.white)
