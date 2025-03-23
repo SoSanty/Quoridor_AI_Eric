@@ -4,6 +4,7 @@ import time
 import json
 import os
 
+
 class QuoridorBoard:
     """
     Represents the Quoridor game board.
@@ -21,6 +22,7 @@ class QuoridorBoard:
         self.fences = set()
         self.fences_gui = set()
         self.game_state = {}
+        self.fences_left = {1: 10, 2: 10}  # Ogni giocatore parte con 10 muri
             
         # Delete the game_state.json file if it exists
         if os.path.exists("game_state.json"):
@@ -54,7 +56,7 @@ class QuoridorBoard:
         print(f"Player {player} at ({x}, {y}) attempting to move to ({new_x}, {new_y})")
 
         # # Check for opponent occupied space
-        # if new_position == self.player_positions[3 - player]:
+        #if new_position == self.player_positions[3 - player]:
         #     print("Opponent is occupying the space.")
         #     return False
         
@@ -76,7 +78,7 @@ class QuoridorBoard:
         print("Move is invalid (no valid conditions met).")
         return False
     
-    def place_fence(self, x: int, y: int, orientation: str) -> bool:
+    def place_fence(self, x: int, y: int, orientation: str, player: int) -> bool:
         """
         Places a fence if valid, with adjusted coordinate placement for horizontal and vertical fences.
         
@@ -88,7 +90,11 @@ class QuoridorBoard:
         Returns:
             bool: True if the fence was placed, False otherwise.
         """
-        
+        if self.fences_left[player] <= 0:
+            print(f"Giocatore {player} ha finito i muri!")
+            return False
+
+
         # Check if any wall in self.fences has the same first coordinate
         for wall in self.fences:
             coord1, coord2, orient = wall  # Unpack the wall coordinates and orientation
@@ -123,6 +129,8 @@ class QuoridorBoard:
             self.fences.remove((wall))
             return False
 
+        # **Diminuisce il numero di muri rimanenti**
+        self.fences_left[player] -= 1
 
         return True
     
@@ -203,11 +211,15 @@ class QuoridorBoard:
         player2 = self.player_positions[2]
 
         self.game_state = {
-            "player_positions": {"player1": player1, "player2": player2},
-            "walls": list(self.fences_gui),
-            "turn": "player1",
-            "board": []
-        }
+        "player_positions": {"player1": player1, "player2": player2},
+        "walls": list(self.fences_gui),  # Lista dei muri
+        "walls_remaining": {
+            "player_1": self.fences_left[1],  # Muri rimanenti per player 1
+            "player_2": self.fences_left[2]   # Muri rimanenti per player 2
+        },
+        "turn": "player1",  # Turno attuale
+        "board": []  # Stato della board, se necessario
+    }
 
         with open("game_state.json", "w") as file:
             json.dump(self.game_state, file)
