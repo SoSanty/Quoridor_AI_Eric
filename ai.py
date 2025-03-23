@@ -209,7 +209,7 @@ class AI:
             original_position = self.game_state["player_positions"][f"player{player}"]
             self.game_state["player_positions"][f"player{player}"] = move
 
-            move_value = self.minimax(depth=3, alpha=-float('inf'), beta=float('inf'),
+            move_value = self.minimax(depth=5, alpha=-float('inf'), beta=float('inf'),
                                         maximizing_player=False, player=2 if player == 1 else 1)
 
             self.game_state["player_positions"][f"player{player}"] = original_position  # Reset
