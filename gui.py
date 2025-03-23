@@ -85,18 +85,16 @@ class QuoridorGame:
         """Draw the remaining walls for both players on the right side of the board."""
         font = pygame.font.Font(None, 30)
         
-        # Ripulire l'area dove vengono disegnati i contatori
-        # Cancelliamo l'area in cui vogliamo scrivere i numeri. 
-        # Qui disegniamo un rettangolo bianco che copre l'intera area a destra della griglia.
+        # Clean up the area where the counters are drawn
         pygame.draw.rect(self.screen, self.white, (self.window_size, 0, 250, self.window_size))
 
-        # Disegnare il contatore dei muri di Player 1
+        # Drawing the wall counter of Player 1
         player1_text = font.render(f"Player 1 Walls: {player1_walls}", True, self.red)
-        self.screen.blit(player1_text, (self.window_size + 20, 50))  # Posiziona a destra della griglia
+        self.screen.blit(player1_text, (self.window_size + 20, 50))  # Place to the right of the grid
         
-        # Disegnare il contatore dei muri di Player 2
+        # Drawing the wall counter of Player 2
         player2_text = font.render(f"Player 2 Walls: {player2_walls}", True, self.blue)
-        self.screen.blit(player2_text, (self.window_size + 20, 100))  # Posiziona a destra della griglia
+        self.screen.blit(player2_text, (self.window_size + 20, 100))  # Place to the right of the grid
 
 
 

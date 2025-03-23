@@ -22,7 +22,7 @@ class QuoridorBoard:
         self.fences = set()
         self.fences_gui = set()
         self.game_state = {}
-        self.fences_left = {1: 10, 2: 10}  # Ogni giocatore parte con 10 muri
+        self.fences_left = {1: 10, 2: 10}  # Every player has 10 walls
             
         # Delete the game_state.json file if it exists
         if os.path.exists("game_state.json"):
@@ -129,7 +129,7 @@ class QuoridorBoard:
             self.fences.remove((wall))
             return False
 
-        # **Diminuisce il numero di muri rimanenti**
+        # **Decreases the number of remaining walls**
         self.fences_left[player] -= 1
 
         return True
@@ -214,11 +214,11 @@ class QuoridorBoard:
         "player_positions": {"player1": player1, "player2": player2},
         "walls": list(self.fences_gui),  # Lista dei muri
         "walls_remaining": {
-            "player_1": self.fences_left[1],  # Muri rimanenti per player 1
-            "player_2": self.fences_left[2]   # Muri rimanenti per player 2
+            "player_1": self.fences_left[1],  # Walls left for player 1
+            "player_2": self.fences_left[2]   # Walls left for player 1
         },
-        "turn": "player1",  # Turno attuale
-        "board": []  # Stato della board, se necessario
+        "turn": "player1",  # Actual turn
+        "board": []  # Board state
     }
 
         with open("game_state.json", "w") as file:

@@ -60,23 +60,16 @@ class MainGame:
                         else:
                             print("Invalid input. Use 'M' to move or 'F' to place a fence.")
                 else:
-                    #action, new_move = self.ai.make_move(current_player)
-                    #if (action== "move"):
-                    #    x, y = new_move
-                    #    self.board.move_pawn(current_player, (x, y))
-                    #    self.board.update_gui_game_state()  # Salva lo stato nel file JSON
-                    #if (action== "fence") :
-                    #    x, y, orientation = new_move
-                    #    self.board.place_fence(x, y, orientation)
+                    
                     self.ai.make_move(current_player)
-                    self.board.update_gui_game_state()  # Salva lo stato nel file JSON
+                    self.board.update_gui_game_state()  # Save the state in the JSON file
 
 
                 # Check for victory
                 if self.board.player_positions[current_player][1] == (8 if current_player == 1 else 0):
                     
                     print(f"Player {current_player} wins!")
-                    self.board.update_gui_game_state()  # Salva lo stato finale nel file JSON
+                    self.board.update_gui_game_state()  # Save the final state in the JSON file
                     break
 
                 # Switch turn
@@ -92,6 +85,3 @@ if __name__ == "__main__":
     main_game = MainGame()
     main_game.main()
 
-
-
-    #he tried to block me with an invalid fence and he didn't think about another move, he lost his turn
