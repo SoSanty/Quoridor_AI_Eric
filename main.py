@@ -7,6 +7,8 @@ class MainGame:
     def __init__(self, window_size=700, grid_size=9):
         self.board = QuoridorBoard()
         self.ai = AI(self.board)
+        self.fences_player1 = 10  # Counter for fences placed by player 1
+        
 
     def main(self):
         time.sleep(1)
@@ -20,10 +22,6 @@ class MainGame:
             while True:
                 if current_player == 1:
                     print(f"Player {current_player}'s turn.")
-
-
-                    
-
 
                     while True:
                         move_type = input("Move the pawn (M) or place a fence (F)? ").strip().upper()
@@ -42,31 +40,36 @@ class MainGame:
                                 print("Enter valid coordinates (e.g., '4 3').")
 
                         elif move_type == 'F':
-                            try:
-                                x, y = map(int, input("Enter the X and Y coordinates for the fence: ").split())
-                                orientation = input("Enter orientation (H for horizontal, V for vertical): ").strip().upper()
-                                if self.board.place_fence(x, y, orientation):
-                                    print("Fence placed successfully!")
-                                    self.board.update_gui_game_state()  # Salva lo stato nel file JSON
-                                    
-                                    break
-                                else:
-                                    print("Invalid fence position, try again.")
-                            except ValueError:
-                                print("Enter valid coordinates.")
+                            if  (self.fences_player1 > 0): #it checks if the user put 10 walls
+                                try:
+                                    x, y = map(int, input("Enter the X and Y coordinates for the fence: ").split())
+                                    orientation = input("Enter orientation (H for horizontal, V for vertical): ").strip().upper()
 
+                                    if  self.board.place_fence(x, y, orientation,current_player):
+                                        self.fences_player1 -= 1  # Increment fence counter for player 1
+                                        print("Fence placed successfully!")
+                                        self.board.update_gui_game_state()  # Save the state in json
+                                        
+                                        break
+                                    else:
+                                        print("Invalid fence position, try again.")
+                                except ValueError:
+                                    print("Enter valid coordinates.")
+                            else:
+                                print("You have already placed 10 fences. You cannot place more.")
                         else:
                             print("Invalid input. Use 'M' to move or 'F' to place a fence.")
                 else:
-                    action, new_move = self.ai.make_move(current_player)
-                    if (action== "move"):
-                        x, y = new_move
-                        self.board.move_pawn(current_player, (x, y))
-                        self.board.update_gui_game_state()  # Salva lo stato nel file JSON
-                    if (action== "fence"):
-                        x, y, orientation = new_move
-                        self.board.place_fence(x, y, orientation)
-                        self.board.update_gui_game_state()  # Salva lo stato nel file JSON
+                    #action, new_move = self.ai.make_move(current_player)
+                    #if (action== "move"):
+                    #    x, y = new_move
+                    #    self.board.move_pawn(current_player, (x, y))
+                    #    self.board.update_gui_game_state()  # Salva lo stato nel file JSON
+                    #if (action== "fence") :
+                    #    x, y, orientation = new_move
+                    #    self.board.place_fence(x, y, orientation)
+                    self.ai.make_move(current_player)
+                    self.board.update_gui_game_state()  # Salva lo stato nel file JSON
 
 
                 # Check for victory
@@ -88,3 +91,7 @@ class MainGame:
 if __name__ == "__main__":
     main_game = MainGame()
     main_game.main()
+
+
+
+    #he tried to block me with an invalid fence and he didn't think about another move, he lost his turn
