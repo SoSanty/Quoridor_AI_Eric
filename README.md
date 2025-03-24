@@ -56,4 +56,4 @@ Our AI Player analyzes the board and makes strategic decisions to try and win th
 
 Objective
 
-Win by reaching the opposite side before the AI… if you can! Have fun! 
+Win by reaching the opposite side before the AI… if you can! Have fun!
