@@ -44,7 +44,7 @@ class MainGame:
                         move_type = input("Move the pawn (M), place a fence (F), or restart game (RESTART)? ").strip().upper()
                         if move_type == 'RESTART':
                             print("Restarting the game...")
-                            return  # Exits inner loop and restarts the game
+                            return  # When the player enters "RESTART" the program terminates and must be manually restarted.  
 
                         if move_type == 'M':
                             try:
