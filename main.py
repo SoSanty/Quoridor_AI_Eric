@@ -24,7 +24,11 @@ class MainGame:
                     print(f"Player {current_player}'s turn.")
 
                     while True:
-                        move_type = input("Move the pawn (M) or place a fence (F)? ").strip().upper()
+                        move_type = input("Move the pawn (M), place a fence (F), or restart game (RESTART)? ").strip().upper()
+                        if move_type == 'RESTART':
+                            print("Restarting the game...")
+                            return  # esce dal ciclo interno e ricomincia la partita
+
                         if move_type == 'M':
                             try:
                                 x, y = map(int, input("Enter the X and Y coordinates of the new position (separated by space): ").split())

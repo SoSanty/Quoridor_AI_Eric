@@ -138,6 +138,20 @@ class AI:
                     break  # Pruning
             return min_eval
 
+    def should_place_fence(self, board, opponent):
+        opponent_path = board.a_star(opponent.position, opponent.goal)
+        my_path = board.a_star(self.position, self.goal)
+
+        # Decidi di piazzare una fence solo se:
+        # 1) hai ancora fence disponibili
+        # 2) l'avversario è molto vicino al goal (per esempio a distanza <= 3 mosse)
+        # 3) la fence riduce effettivamente il percorso avversario rispetto al tuo
+        if self.fences_left > 0 and opponent_path and len(opponent_path) <= 3:
+            if len(opponent_path) <= len(my_path):
+                return True
+        return False
+
+
     def find_shortest_path(self, player):
         """Find the shortest path for the player by avoiding walls using A*."""
         start = tuple(self.game_state["player_positions"][f"player{player}"])
@@ -180,7 +194,9 @@ class AI:
         return path
 
 
-    def choose_move(self, player):
+    def choose_move(self, player, tried_fences=None):
+        if tried_fences is None:
+            tried_fences = set()
         """Selects the best move using A* for the shortest path and Minimax for strategic decisions."""
         
         valid_moves = self.get_valid_moves(player)
@@ -229,17 +245,32 @@ class AI:
             original_opponent_distance = len(original_opponent_path) if original_opponent_path else float('inf')
 
             # Correctly place the fence in QuoridorBoard
-            self.board.fences.add(((x, y), (x + (1 if orientation == "H" else 0), y + (1 if orientation == "V" else 0)), orientation))
-            self.board.update_gui_game_state()  # Ensure game state is updated
+            original_fences = self.board.fences.copy()
+            original_fences_gui = self.board.fences_gui.copy()
 
-            # Recalculate the opponent’s shortest path
-            new_opponent_path = self.find_shortest_path(opponent)
-            new_opponent_distance = len(new_opponent_path) if new_opponent_path else float('inf')
+            # Tenta di piazzare la fence
+            # Salva il contatore dei muri prima di simulare
+            original_fences_left = self.board.fences_left.copy()
 
-            # Reset the fence by removing it from `self.board.fences`
-            self.board.fences.remove(((x, y), (x + (1 if orientation == "H" else 0), y + (1 if orientation == "V" else 0)), orientation))
-            self.board.fences_gui.remove((x, y, orientation))
-            self.board.update_gui_game_state()  # Reset game state
+            # Simulazione fence
+            fence_successful = self.board.place_fence(x, y, orientation, player)
+
+            # Dopo la simulazione, ripristina sempre il contatore originale
+            self.board.fences_left = original_fences_left
+
+
+            if fence_successful:
+                # Calcola la nuova distanza avversario se fence valida
+                new_opponent_path = self.find_shortest_path(opponent)
+                new_opponent_distance = len(new_opponent_path) if new_opponent_path else float('inf')
+            else:
+                # Assegna un valore di default se la fence fallisce
+                new_opponent_distance = original_opponent_distance
+            # Ripristina completamente lo stato precedente
+            self.board.fences = original_fences
+            self.board.fences_gui = original_fences_gui
+            self.board.update_gui_game_state()
+
 
             slowdown = new_opponent_distance - original_opponent_distance
             fence_value = slowdown * 5  # Assign a weight to opponent slowdown
@@ -265,9 +296,10 @@ class AI:
     def make_move(self, player):
         """Applies a move for the AI and updates the game state using the board functions."""
         self.game_state = self.read_game_state()
+        tried_fences = set()
 
-        while True:  # He keeps looking for a valid move until he finds it
-            action = self.choose_move(player)
+        while True:  # Keep looking for a valid move until found
+            action = self.choose_move(player, tried_fences)
 
             if action is None:
                 print(f"AI has no valid moves for player {player}")
@@ -278,26 +310,22 @@ class AI:
                 if self.board.move_pawn(player, new_position):
                     self.game_state = self.read_game_state()
                     print(f"AI moved player {player} to {new_position}")
-                    break  # Exits the cycle after a valid move
+                    break  # Exits loop after valid move
                 else:
                     print(f"AI tried to move to {new_position}, but it was invalid. Retrying...")
 
             elif action[0] == "fence":
                 x, y, orientation = action[1]
 
-                # Check if the location of the wall is valid before attempting to place it
                 if self.board.place_fence(x, y, orientation, player):
-                    self.fences_player2 -= 1  # Reduce the number of available fences
                     self.game_state = self.read_game_state()
                     print(f"AI placed a fence at ({x}, {y}) with orientation {orientation}")
-                    break  # Exits the cycle after placing a valid wall
+                    break  # Esce dal ciclo dopo aver piazzato correttamente
                 else:
-                    print(f"AI cannot place a fence at ({x}, {y}) with orientation {orientation}. Changing strategy...")
+                    print(f"AI failed placing fence at ({x}, {y}, {orientation}). Changing strategy...")
+                    tried_fences.add((x, y, orientation))
 
-                    # If he cannot place the wall, he uses the A* algorithm to find a movement
-                    print("AI will now choose a move using A*.")
-                    
-                    # Find the shortest path with A* and make the movement
+                    # Usa subito A* per fare una mossa alternativa
                     path = self.find_shortest_path(player)
                     if len(path) > 1:
                         next_step = path[1]
@@ -309,3 +337,4 @@ class AI:
                             print(f"AI tried to move to {next_step} using A*, but it was invalid. Retrying...")
                     else:
                         print("A* found no valid moves. Retrying...")
+

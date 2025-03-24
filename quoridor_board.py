@@ -221,4 +221,3 @@ class QuoridorBoard:
             json.dump(self.game_state, file)
 
         print("Game state saved to file:", self.game_state)
-
