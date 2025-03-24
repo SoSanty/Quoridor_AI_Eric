@@ -48,7 +48,9 @@ class MainGame:
                                 try:
                                     x, y = map(int, input("Enter the X and Y coordinates for the fence: ").split())
                                     orientation = input("Enter orientation (H for horizontal, V for vertical): ").strip().upper()
-
+                                    if orientation not in ['H', 'V']:
+                                            print("Invalid orientation. Please enter 'H' for horizontal or 'V' for vertical.")
+                                            continue  # Re-ask orientation
                                     if  self.board.place_fence(x, y, orientation,current_player):
                                         self.fences_player1 -= 1  # Increment fence counter for player 1
                                         print("Fence placed successfully!")
