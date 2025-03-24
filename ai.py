@@ -93,7 +93,7 @@ class AI:
 
         # Adjust the heuristic to consider the impact of walls more significantly
         heuristic_value = opponent_distance - player_distance + (player_walls - opponent_walls) * 0.5
-        print(f"Player {player} heuristic value: {heuristic_value}")
+        
         return heuristic_value
 
         # Adjust the heuristic to consider the impact of walls more significantly
