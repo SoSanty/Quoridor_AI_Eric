@@ -97,7 +97,7 @@ class QuoridorBoard:
             if (coord1 == (x, y) or coord2 == (x, y)) and orient == orientation:  # 
                 print("1")
                 return False
-            if (coord1 == (x+1, y) or coord1 == (x, y+1)) and orient == orientation:
+            if coord1 == (x+1, y) and orient == orientation:
                 print("2")
                 return False
             if (coord1 == (x, y) and orient != orientation):  # Prevent crossing walls

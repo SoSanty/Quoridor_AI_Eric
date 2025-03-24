@@ -198,7 +198,7 @@ class AI:
         if tried_fences is None:
             tried_fences = set()
         """Selects the best move using A* for the shortest path and Minimax for strategic decisions."""
-        
+
         valid_moves = self.get_valid_moves(player)
         valid_fences = self.get_valid_fences(player)
 
@@ -213,7 +213,7 @@ class AI:
             next_step = path[1]
             if next_step in valid_moves:
                 a_star_move = ("move", next_step)  # Save the best A* move (don't return yet!)
-        
+
         print(f"A* path for player {a_star_move}")  # Debugging
 
         # 2. Use Minimax to evaluate if another move is better
@@ -240,58 +240,66 @@ class AI:
             x, y, orientation = fence
             opponent = 2 if player == 1 else 1
 
-            # Store original opponent path before placing the fence
+            # Store original paths before placing the fence
             original_opponent_path = self.find_shortest_path(opponent)
-            original_opponent_distance = len(original_opponent_path) if original_opponent_path else float('inf')
+            original_player_path = self.find_shortest_path(player)
 
-            # Correctly place the fence in QuoridorBoard
+            original_opponent_distance = len(original_opponent_path) if original_opponent_path else float('inf')
+            original_player_distance = len(original_player_path) if original_player_path else float('inf')
+
+            # Save the original fences state
             original_fences = self.board.fences.copy()
             original_fences_gui = self.board.fences_gui.copy()
-
-            # Tenta di piazzare la fence
-            # Salva il contatore dei muri prima di simulare
             original_fences_left = self.board.fences_left.copy()
 
-            # Simulazione fence
+            # Attempt fence placement simulation
             fence_successful = self.board.place_fence(x, y, orientation, player)
 
-            # Dopo la simulazione, ripristina sempre il contatore originale
+            # Restore fences left count
             self.board.fences_left = original_fences_left
 
-
             if fence_successful:
-                # Calcola la nuova distanza avversario se fence valida
+                # Evaluate new path lengths if fence placement succeeded
                 new_opponent_path = self.find_shortest_path(opponent)
+                new_player_path = self.find_shortest_path(player)
+
                 new_opponent_distance = len(new_opponent_path) if new_opponent_path else float('inf')
+                new_player_distance = len(new_player_path) if new_player_path else float('inf')
+
+                # Restore previous fence state after evaluation
+                self.board.fences = original_fences
+                self.board.fences_gui = original_fences_gui
+                self.board.update_gui_game_state()
+
+                # Calculate net benefit (opponent slowdown minus player slowdown)
+                opponent_slowdown = new_opponent_distance - original_opponent_distance
+                player_slowdown = new_player_distance - original_player_distance
+                net_benefit = opponent_slowdown - player_slowdown
+
+                fence_value = net_benefit * 5  # Assign a weight to net slowdown
+                print(f"Fence:{x,y,orientation} Opponent slowdown: {opponent_slowdown}, Player slowdown: {player_slowdown}, Fence value: {fence_value}")
+
+                # Evaluate if this fence is the new best action
+                if fence_value > best_value and fence not in tried_fences:
+                    best_value = fence_value
+                    best_action = ("fence", fence)
+                    print(f"Best fence value from Minimax (considering both players): {fence_value}, {best_value}, {best_action}")
             else:
-                # Assegna un valore di default se la fence fallisce
-                new_opponent_distance = original_opponent_distance
-            # Ripristina completamente lo stato precedente
-            self.board.fences = original_fences
-            self.board.fences_gui = original_fences_gui
-            self.board.update_gui_game_state()
-
-
-            slowdown = new_opponent_distance - original_opponent_distance
-            fence_value = slowdown * 5  # Assign a weight to opponent slowdown
-            print(f"Fence:{x,y,orientation} Slowdown: {slowdown}, Fence value: {fence_value}")
-
-            if fence_value > best_value:
-                best_value = fence_value
-                best_action = ("fence", fence)
-                print(f"Best fence value from Minimax: {fence_value}, {best_value}, {best_action}")
-
-        
+                # If fence placement simulation failed, revert state
+                self.board.fences = original_fences
+                self.board.fences_gui = original_fences_gui
+                self.board.update_gui_game_state()
 
         # 3. Compare A* move vs. Minimax move
         if a_star_move:
             print(f"A* suggests move: {a_star_move[1]}")
             # If Minimax doesn't suggest a better alternative, use A* move
-            if best_action is None:
+            if best_action is None or best_value <= 0:
                 return a_star_move  
 
         print(f"Minimax chose: {best_action}")  # Debugging
         return best_action  # If A* was skipped, return Minimax best action
+
 
     def make_move(self, player):
         """Applies a move for the AI and updates the game state using the board functions."""

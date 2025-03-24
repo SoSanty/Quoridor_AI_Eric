@@ -1,1 +1,1 @@
-{"player_positions": {"player1": [4, 0], "player2": [4, 8]}, "walls": [], "walls_remaining": {"player_1": 10, "player_2": 10}, "turn": "player1", "board": []}
+{"player_positions": {"player1": [3, 1], "player2": [3, 6]}, "walls": [[4, 7, "H"], [2, 5, "V"], [6, 2, "V"], [2, 7, "H"], [5, 3, "H"], [1, 6, "H"], [7, 2, "H"], [3, 5, "H"], [0, 7, "H"], [3, 6, "H"], [4, 4, "V"]], "walls_remaining": {"player_1": 4, "player_2": 5}, "turn": "player1", "board": []}
