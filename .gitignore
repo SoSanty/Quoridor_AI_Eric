@@ -1,0 +1,25 @@
+# Ignore Python bytecode files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment folder (if you have one, usually named 'venv')
+venv/
+env/
+
+# Ignore local configuration files
+*.env
+*.sqlite3
+
+# Ignore IDE and editor files (e.g., VSCode, PyCharm)
+.vscode/
+.idea/
+
+# Ignore the game state json file if you don't want to commit it
+game_state.json
+
+# Ignore backup files (e.g., created by text editors)
+*~ 
+*.bak
+
+# Ignore log files
+*.log
