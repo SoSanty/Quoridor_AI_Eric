@@ -142,10 +142,10 @@ class AI:
         opponent_path = board.a_star(opponent.position, opponent.goal)
         my_path = board.a_star(self.position, self.goal)
 
-        # Decidi di piazzare una fence solo se:
-        # 1) hai ancora fence disponibili
-        # 2) l'avversario è molto vicino al goal (per esempio a distanza <= 3 mosse)
-        # 3) la fence riduce effettivamente il percorso avversario rispetto al tuo
+            # 1) you still have fences available
+            # 2) the opponent is very close to the goal (for example, at a distance of <= 3 moves)
+            # 3) the fence effectively increases the opponent's path relative to yours
+
         if self.fences_left > 0 and opponent_path and len(opponent_path) <= 3:
             if len(opponent_path) <= len(my_path):
                 return True
@@ -328,12 +328,12 @@ class AI:
                 if self.board.place_fence(x, y, orientation, player):
                     self.game_state = self.read_game_state()
                     print(f"AI placed a fence at ({x}, {y}) with orientation {orientation}")
-                    break  # Esce dal ciclo dopo aver piazzato correttamente
+                    break
                 else:
                     print(f"AI failed placing fence at ({x}, {y}, {orientation}). Changing strategy...")
                     tried_fences.add((x, y, orientation))
 
-                    # Usa subito A* per fare una mossa alternativa
+                    # Immediately use A* to make an alternative move
                     path = self.find_shortest_path(player)
                     if len(path) > 1:
                         next_step = path[1]
