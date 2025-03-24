@@ -81,13 +81,13 @@ class MainGame:
                 # Switch turn
                 current_player = 2 if current_player == 1 else 1
 
-            # Ask if the user wants to restart or exit
-            restart = input("Do you want to play again? (Y for yes, any other key to exit): ").strip().upper()
-            if restart != 'Y':
-                print("Goodbye!")
-                break
-
 if __name__ == "__main__":
-    main_game = MainGame()
-    main_game.main()
+    while True:
+        main_game = MainGame()
+        main_game.main()
 
+        # Ask if the user wants to restart or exit
+        restart = input("Do you want to play again? (Y for yes, any other key to exit): ").strip().upper()
+        if restart != 'Y':
+            print("Goodbye!")
+            exit()

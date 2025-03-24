@@ -53,7 +53,6 @@ class QuoridorBoard:
         x, y = self.player_positions[player]
         new_x, new_y = new_position
 
-        print(f"Player {player} at ({x}, {y}) attempting to move to ({new_x}, {new_y})")
 
         
         # Ensure the move is within board boundaries
@@ -63,7 +62,6 @@ class QuoridorBoard:
 
         # Check for simple adjacent moves
         if (abs(new_x - x) == 1 and new_y == y) or (abs(new_y - y) == 1 and new_x == x):
-            print("Checking for simple adjacent move.")
             if self.is_fence_blocking(x, y, new_x, new_y):
                 print("Fence is blocking the move.")
                 return False
@@ -87,7 +85,6 @@ class QuoridorBoard:
             bool: True if the fence was placed, False otherwise.
         """
         if self.fences_left[player] <= 0:
-            print(f"Player {player} ran out of walls!")
             return False
 
 
@@ -95,13 +92,10 @@ class QuoridorBoard:
         for wall in self.fences:
             coord1, coord2, orient = wall  # Unpack the wall coordinates and orientation
             if (coord1 == (x, y) or coord2 == (x, y)) and orient == orientation:  # 
-                print("1")
                 return False
             if coord1 == (x+1, y) and orient == orientation:
-                print("2")
                 return False
             if (coord1 == (x, y) and orient != orientation):  # Prevent crossing walls
-                print("3")
                 return False  # If there's a cross, return False
 
         # Handle horizontal fence placement (between (x, y) and (x, y+1))
@@ -118,7 +112,6 @@ class QuoridorBoard:
         
         # Add the new wall to the fence set
         self.fences.add(wall)
-        print(f"Fences:{self.fences}")
         # Ensure both players still have a path to their goal
         if not self.has_path_to_goal(1) or not self.has_path_to_goal(2):
             # Undo the fence placement if it blocks paths
@@ -190,7 +183,6 @@ class QuoridorBoard:
                     if not self.is_fence_blocking(x, y, nx, ny):  
                         stack.append((nx, ny))  # Add to stack for DFS
 
-        print(f'Player {player} has no path to goal.')
         # If we exit the loop, no valid path was found
         return False
     
@@ -219,5 +211,3 @@ class QuoridorBoard:
 
         with open("game_state.json", "w") as file:
             json.dump(self.game_state, file)
-
-        print("Game state saved to file:", self.game_state)

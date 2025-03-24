@@ -48,10 +48,6 @@ class AI:
             if 0 <= nx < 9 and 0 <= ny < 9:  # Ensure the move is inside the board
                 if not self.board.is_fence_blocking(x, y, nx, ny):
                     valid_moves.append((nx, ny))
-                else:
-                    print(f"Move to ({nx}, {ny}) is blocked by a fence.")
-
-        print(f"Valid moves for player {player}: {valid_moves}")
         return valid_moves
 
 
@@ -59,7 +55,6 @@ class AI:
     def get_valid_fences(self,player):
         """Returns a list of valid fences the AI can place."""
         valid_fences = []
-        print(self.game_state)
         # Assume that self.game_state is already defined and contains the "walls" key.
         walls = self.game_state.get("walls", [])  # Get the list of walls from game state (default empty list)
 
@@ -80,7 +75,6 @@ class AI:
                         # Check if the vertical fence at (x, y) is valid (not blocked by a wall)
                         if (x, y, orientation) not in walls_set and (x, y + 1, orientation) not in walls_set and (x, y - 1, orientation) not in walls_set and (x,y,'H') not in walls_set:
                             valid_fences.append((x, y, orientation))  # Add valid vertical fence
-        print(f"Valid fences for player {player}: {valid_fences}")
         return valid_fences
 
 
@@ -93,13 +87,14 @@ class AI:
 
         player_distance = len(player_path)-1 if player_path else float('inf')
         opponent_distance = len(opponent_path)-1 if opponent_path else float('inf')
-
         # Include the number of walls placed as a factor in the heuristic
-        player_walls = self.game_state.get("player_walls", {}).get(f"player{player}", 0)
-        opponent_walls = self.game_state.get("player_walls", {}).get(f"player{opponent}", 0)
+        player_walls = self.game_state.get("walls_remaining", {}).get(f"player_{player}", 0)
+        opponent_walls = self.game_state.get("walls_remaining", {}).get(f"player_{opponent}", 0)
 
         # Adjust the heuristic to consider the impact of walls more significantly
-        return opponent_distance - player_distance + (player_walls - opponent_walls) * 0.5  # AI wants a larger gap in its favor
+        heuristic_value = opponent_distance - player_distance + (player_walls - opponent_walls) * 0.5
+        print(f"Player {player} heuristic value: {heuristic_value}")
+        return heuristic_value
 
     def minimax(self, depth, alpha, beta, maximizing_player, player):
         if depth == 0:
@@ -137,20 +132,6 @@ class AI:
                 if beta <= alpha:
                     break  # Pruning
             return min_eval
-
-    def should_place_fence(self, board, opponent):
-        opponent_path = board.a_star(opponent.position, opponent.goal)
-        my_path = board.a_star(self.position, self.goal)
-
-            # 1) you still have fences available
-            # 2) the opponent is very close to the goal (for example, at a distance of <= 3 moves)
-            # 3) the fence effectively increases the opponent's path relative to yours
-
-        if self.fences_left > 0 and opponent_path and len(opponent_path) <= 3:
-            if len(opponent_path) <= len(my_path):
-                return True
-        return False
-
 
     def find_shortest_path(self, player):
         """Find the shortest path for the player by avoiding walls using A*."""
@@ -214,7 +195,6 @@ class AI:
             if next_step in valid_moves:
                 a_star_move = ("move", next_step)  # Save the best A* move (don't return yet!)
 
-        print(f"A* path for player {a_star_move}")  # Debugging
 
         # 2. Use Minimax to evaluate if another move is better
         best_action = None
@@ -233,7 +213,6 @@ class AI:
             if move_value > best_value:
                 best_value = move_value
                 best_action = ("move", move)
-                print(f"Best move value from Minimax: {move_value}, {best_value}, {best_action}")
 
         # Test all possible fences, but now evaluate them properly
         for fence in valid_fences:
@@ -277,13 +256,11 @@ class AI:
                 net_benefit = opponent_slowdown - player_slowdown
 
                 fence_value = net_benefit * 5  # Assign a weight to net slowdown
-                print(f"Fence:{x,y,orientation} Opponent slowdown: {opponent_slowdown}, Player slowdown: {player_slowdown}, Fence value: {fence_value}")
 
                 # Evaluate if this fence is the new best action
                 if fence_value > best_value and fence not in tried_fences:
                     best_value = fence_value
                     best_action = ("fence", fence)
-                    print(f"Best fence value from Minimax (considering both players): {fence_value}, {best_value}, {best_action}")
             else:
                 # If fence placement simulation failed, revert state
                 self.board.fences = original_fences
@@ -292,12 +269,10 @@ class AI:
 
         # 3. Compare A* move vs. Minimax move
         if a_star_move:
-            print(f"A* suggests move: {a_star_move[1]}")
             # If Minimax doesn't suggest a better alternative, use A* move
             if best_action is None or best_value <= 0:
                 return a_star_move  
 
-        print(f"Minimax chose: {best_action}")  # Debugging
         return best_action  # If A* was skipped, return Minimax best action
 
 
@@ -317,7 +292,7 @@ class AI:
                 new_position = action[1]
                 if self.board.move_pawn(player, new_position):
                     self.game_state = self.read_game_state()
-                    print(f"AI moved player {player} to {new_position}")
+                    print(f"AI1 moved to {new_position}.")
                     break  # Exits loop after valid move
                 else:
                     print(f"AI tried to move to {new_position}, but it was invalid. Retrying...")
@@ -327,8 +302,8 @@ class AI:
 
                 if self.board.place_fence(x, y, orientation, player):
                     self.game_state = self.read_game_state()
-                    print(f"AI placed a fence at ({x}, {y}) with orientation {orientation}")
-                    break
+                    print(f"AI1 placed fence at ({x}, {y}, {orientation}).")
+                    break  # Esce dal ciclo dopo aver piazzato correttamente
                 else:
                     print(f"AI failed placing fence at ({x}, {y}, {orientation}). Changing strategy...")
                     tried_fences.add((x, y, orientation))
@@ -339,10 +314,8 @@ class AI:
                         next_step = path[1]
                         if self.board.move_pawn(player, next_step):
                             self.game_state = self.read_game_state()
-                            print(f"AI moved player {player} to {next_step} using A*")
                             break
                         else:
                             print(f"AI tried to move to {next_step} using A*, but it was invalid. Retrying...")
                     else:
                         print("A* found no valid moves. Retrying...")
-
