@@ -96,6 +96,9 @@ class AI:
         print(f"Player {player} heuristic value: {heuristic_value}")
         return heuristic_value
 
+        # Adjust the heuristic to consider the impact of walls more significantly
+        return opponent_distance - player_distance # AI wants a larger gap in its favor
+
     def minimax(self, depth, alpha, beta, maximizing_player, player):
         if depth == 0:
             return self.heuristic(player)  # We evaluate the state with heuristics
@@ -132,6 +135,8 @@ class AI:
                 if beta <= alpha:
                     break  # Pruning
             return min_eval
+
+
 
     def find_shortest_path(self, player):
         """Find the shortest path for the player by avoiding walls using A*."""
@@ -308,7 +313,6 @@ class AI:
                     print(f"AI failed placing fence at ({x}, {y}, {orientation}). Changing strategy...")
                     tried_fences.add((x, y, orientation))
 
-                    # Immediately use A* to make an alternative move
                     path = self.find_shortest_path(player)
                     if len(path) > 1:
                         next_step = path[1]
