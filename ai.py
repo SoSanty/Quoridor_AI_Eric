@@ -3,18 +3,15 @@ import json
 from quoridor_board import QuoridorBoard
 import heapq
 
-
-
 class AI:
     """Class that handles AI decision-making in Quoridor."""
-    
+
     def __init__(self, board):
         """Initialize the AI agent and load the game state."""
         self.board = board  # Create an instance of the game board
         self.game_state = {}
         self.game_state = self.read_game_state()  # Ensure game state is loaded or initialized
         self.fences_player2 = 10  # Counter for fences placed by player 2
-
 
     def read_game_state(self):
         """Reads the latest game state from the JSON file or initializes a new one if the file does not exist."""
@@ -24,7 +21,6 @@ class AI:
         except (FileNotFoundError, json.JSONDecodeError):
             print("Error reading game_state.json. Recreating the game state...")
             return self.game_state
-
 
     def get_valid_moves(self, player):
         """Returns a list of valid moves for the given player based on the current game state."""
@@ -48,6 +44,7 @@ class AI:
             if 0 <= nx < 9 and 0 <= ny < 9:  # Ensure the move is inside the board
                 if not self.board.is_fence_blocking(x, y, nx, ny):
                     valid_moves.append((nx, ny))
+
         return valid_moves
 
 
@@ -55,6 +52,7 @@ class AI:
     def get_valid_fences(self,player):
         """Returns a list of valid fences the AI can place."""
         valid_fences = []
+
         # Assume that self.game_state is already defined and contains the "walls" key.
         walls = self.game_state.get("walls", [])  # Get the list of walls from game state (default empty list)
 
@@ -76,7 +74,6 @@ class AI:
                         if (x, y, orientation) not in walls_set and (x, y + 1, orientation) not in walls_set and (x, y - 1, orientation) not in walls_set and (x,y,'H') not in walls_set:
                             valid_fences.append((x, y, orientation))  # Add valid vertical fence
         return valid_fences
-
 
     def heuristic(self, player):
         """Evaluates the game state based on A* shortest paths."""
@@ -135,8 +132,6 @@ class AI:
                 if beta <= alpha:
                     break  # Pruning
             return min_eval
-
-
 
     def find_shortest_path(self, player):
         """Find the shortest path for the player by avoiding walls using A*."""
@@ -199,6 +194,8 @@ class AI:
             next_step = path[1]
             if next_step in valid_moves:
                 a_star_move = ("move", next_step)  # Save the best A* move (don't return yet!)
+        
+        print(f"A* path for player {a_star_move}")  # Debugging
 
 
         # 2. Use Minimax to evaluate if another move is better
@@ -218,8 +215,11 @@ class AI:
             if move_value > best_value:
                 best_value = move_value
                 best_action = ("move", move)
+                print(f"🔍 Best move value from Minimax: {move_value}, {best_value}, {best_action}")
+
 
         # Test all possible fences, but now evaluate them properly
+
         for fence in valid_fences:
             x, y, orientation = fence
             opponent = 2 if player == 1 else 1
@@ -275,6 +275,7 @@ class AI:
         # 3. Compare A* move vs. Minimax move
         if a_star_move:
             # If Minimax doesn't suggest a better alternative, use A* move
+
             if best_action is None or best_value <= 0:
                 return a_star_move  
 

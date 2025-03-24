@@ -53,6 +53,7 @@ class MainGame:
                                     self.board.move_pawn(current_player, (x, y))
                                     print("Valid move!")
                                     self.board.update_gui_game_state()  # Save the state in JSON
+
                                     break
                                 else:
                                     print("Invalid move, try again.")
@@ -84,6 +85,7 @@ class MainGame:
                     self.board.update_gui_game_state()  # Save the state in the JSON file
 
                 # Check for victory condition based on goal row
+
                 if self.board.player_positions[current_player][1] == (8 if current_player == 1 else 0):
                     print(f"Player {current_player} wins!")
                     self.board.update_gui_game_state()  # Save the final state in the JSON file
