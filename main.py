@@ -32,7 +32,8 @@ class MainGame:
         self.board.update_gui_game_state()
         time.sleep(1)
 
-        while True:  # Loop to allow restarting the game
+
+        while True:  
             current_player = 1  # Player 1 starts
 
             while True:
@@ -92,16 +93,12 @@ class MainGame:
                 current_player = 2 if current_player == 1 else 1
 
 
-if __name__ == "__main__":
-    """
-    Entry point for the application. Creates a new instance of the game
-    and runs the main loop. After each game, the user is prompted to restart or exit.
-    """
-    while True:
-        main_game = MainGame()
-        main_game.main()
+            restart = input("Press any key to exit").strip().upper()
+            if restart:
+                print("Goodbye!")
+                exit()
 
-        restart = input("Do you want to play again? (Y for yes, any other key to exit): ").strip().upper()
-        if restart != 'Y':
-            print("Goodbye!")
-            break
+if __name__ == "__main__":
+    main_game = MainGame()
+    main_game.main()
+
