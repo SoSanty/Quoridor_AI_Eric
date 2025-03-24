@@ -1,62 +1,59 @@
-Quoridor - Game with Artificial Intelligence (AI) Description
+Quoridor AI Game
 
-Quoridor is a board game where two players compete to reach the opposite side of the board while using barriers to block the opponent’s path. This project is developed in Python and consists of three main modules:
+What is Quoridor?
 
-    Game Logic (board, movements, move validation).
-    Graphical User Interface (GUI) for user interaction.
-    Main to manage the game flow, player input, and AI interaction.
+Quoridor is a strategic board game for two players, where the goal is to move your pawn to the opposite side of the board before your opponent. Players can either move their pawn or place walls to block the opponent, making the game a tactical challenge between mobility and defense.
 
-In this project, we implemented a GUI for the game and an AI that manages the second player, allowing you to play against the computer. Additionally, a batch file has been created to streamline the game execution on Windows.
-Features
 
-    Two-player game: The game can be played by two players.
-    Player vs AI: The second player can be controlled by an AI that makes decisions based on a predefined algorithm.
-    Graphical User Interface (GUI): An intuitive GUI to play Quoridor, view the board, and interact with the game.
-    Batch file for execution: A batch file (run_game.bat) that starts the game, manages the turns, and runs the GUI in the background.
+Implementation
 
-Technologies Used
+We have developed Quoridor in Python with a well-structured logic divided into four main components:
 
-    Python: Programming language used for game logic, GUI, and AI.
-    Artificial Intelligence: Implemented for the second player to simulate intelligent decisions.
-    Batch file: A Windows batch script (run_game.bat) for starting the game and launching the GUI.
+    MainGame → Manages the game flow and allows user interaction.
+
+    QuoridorBoard → Handles board logic, validates moves, and manages barrier placements.
+
+    GUI → Implemented using Pygame, it provides a visual interface and updates the game in real time.
+
+    AI → A computer opponent capable of playing against the user by making strategic decisions based on the board state.
+
 
 How to Play
 
-    Run the run_game.bat file. This will start the game, launch the GUI in the background, and set up the game environment.
-    The first player can make their moves using the GUI.
-    The second player can be controlled by either another human player or by the AI.
-    Players take turns moving their pieces and placing barriers.
-    The game ends when a player reaches the opposite side of the board.
+To start the game, open two separate terminals:
+1. Start the GUI
 
-Running the Game
-Prerequisites
+In the first terminal, run the following command to launch the graphical interface:
 
-    Ensure that Python 3 is installed on your system.
-    Install the required Python packages if necessary.
+python gui.py
 
-To Run the Game:
+2. Start the Main Game
 
-    Double-click on the run_game.bat file. This will execute the batch file which will:
-        Launch the GUI in the background.
-        Start the main game logic.
-        Prompt the user for input to control the game.
+In the second terminal, run:
 
-    Play the game either with a friend or against the AI.
+python main.py
 
-File Structure
+Now you can play against the AI! In the MainGame terminal, you will be prompted to:
 
-Quoridor/
-│
-├── board.py              # Game logic: board setup and movement rules
-├── gui.py                # Graphical User Interface for the game
-├── main.py               # Main game loop and interaction
-├── ai.py                 # AI for the second player 
-└── run_game.bat          # Batch file to run the game
+    Move your pawn by typing M and entering the coordinates.
+
+    Place a barrier by typing F and specifying the position and orientation (H for horizontal, V for vertical).
 
 
 
-Future Improvements
+Requirements
 
-    Improve AI algorithms to make the computer play more intelligently.
-    Add more customization options (board size, number of barriers, etc.).
-    Implement an online multiplayer mode.
+Ensure that Python 3 is installed on your system.
+
+To run the game, ensure you have the following Python libraries installed:
+
+pip install pygame
+
+
+AI Player
+
+Our AI Player analyzes the board and makes strategic decisions to try and win the game. It can either move optimally or place barriers to block the human player.
+
+Objective
+
+Win by reaching the opposite side before the AI… if you can! Have fun! 
